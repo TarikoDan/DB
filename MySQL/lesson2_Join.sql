@@ -160,32 +160,33 @@ group by c.FirstName, c.LastName;
 # 12. Визначити найбільший та найменший кредити.
 update bank.application
 set Sum = 2500
-# from application a
 where Sum = 3700 and Currency = 'Gryvnia';
 
-select * from (
-select a.Sum,
-       c.FirstName,
-       c.LastName
-from application a,
-     client c
-where c.idClient = a.Client_idClient
-group by c.FirstName,
-         c.LastName
-order by a.Sum
-limit 1) min
+select *
+    from (
+         select a.Sum,
+                c.FirstName,
+                c.LastName
+         from application a,
+              client c
+         where c.idClient = a.Client_idClient
+         group by c.FirstName,
+                  c.LastName
+         order by a.Sum
+         limit 1) min
 union all
-select * from (
-select a.Sum,
-       c.FirstName,
-       c.LastName
-from application a,
-     client c
-where c.idClient = a.Client_idClient
-group by c.FirstName,
-         c.LastName
-order by a.Sum desc
-limit 1) max;
+select *
+    from (
+         select a.Sum,
+                c.FirstName,
+                c.LastName
+         from application a,
+              client c
+         where c.idClient = a.Client_idClient
+         group by c.FirstName,
+                  c.LastName
+         order by a.Sum desc
+         limit 1) max;
 
 
 # 13. Порахувати кількість кредитів для клієнтів,які мають вищу освіту.
@@ -193,8 +194,8 @@ select count(a.idApplication),
        c.FirstName,
        c.LastName,
        c.Education
-       from client c
-            join application a on c.idClient = a.Client_idClient
+from client c
+         join application a on c.idClient = a.Client_idClient
 where Education = 'high'
 group by c.FirstName, c.LastName, c.Education;
 
@@ -203,8 +204,8 @@ select avg(a.Sum) maxAVG,
        c.FirstName,
        c.LastName
 from application a
-join client c on a.Client_idClient = c.idClient
-group by  c.FirstName, c.LastName
+         join client c on a.Client_idClient = c.idClient
+group by c.FirstName, c.LastName
 order by maxAVG desc
 limit 1;
 
@@ -241,7 +242,7 @@ where c.idClient = a.Client_idClient and c.Department_idDepartment = d.idDepartm
 and d.DepartmentCity = 'Lviv'
 group by d.idDepartment
 having SUM(a.Sum > 8000)
-order by a.Sum;
+order by SUM(a.Sum);
 
 # /*Знайти клієнтів, які повністю погасили кредити на суму більше ніж 5000
 select a.Sum,
@@ -285,11 +286,30 @@ limit 1;
 
 
 # /*Знайти кредити, сума яких більша за середнє значення усіх кредитів*/
-
+select a.idApplication id, a.Sum
+from application a
+where Sum > (select avg(a.Sum) from application a)
+order by Sum;
 
 # /*Знайти клієнтів, які є з того самого міста, що і клієнт, який взяв найбільшу кількість кредитів
-# /*Знайти місто чувака який набрав найбільше кредитів
+INSERT INTO `bank`.`client` (`idClient`, `FirstName`, `LastName`, `Education`, `Passport`, `City`, `Age`, `Department_idDepartment`) VALUES ('11', 'Taras', 'Vred', 'high', 'KA7233333', 'Sambir', '42', '5');
 
+select c.idClient id ,c.FirstName Name, c.LastName, c.City, sum(a.Sum) Summ
+from application a right join client c on a.Client_idClient = c.idClient
+where c.City = (select c2.City from client c2
+                join application a2 on c2.idClient = a2.Client_idClient
+                order by a2.Sum desc
+                limit 1)
+group by id;
+
+
+# /*Знайти місто чувака який набрав найбільше кредитів
+select c.City , COUNT(a.Sum) Count
+from client c
+join application a on c.idClient = a.Client_idClient
+group by c.idClient
+order by Count desc
+limit 1;
 
 
 # 17. Усім клієнтам, які мають вищу освіту, встановити усі їхні кредити у розмірі 6000 грн.
