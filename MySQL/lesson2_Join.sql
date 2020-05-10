@@ -304,6 +304,7 @@ where CreditState = 'Returned';
 select a.Sum,
        concat(c.FirstName, ' ',c.LastName) Name
 from application a join client c on a.Client_idClient = c.idClient
-where c.LastName like '_[aeiouy]%';
+# where substring(c.LastName,2,1) in ('a','e','i','o','u','y');
+where c.LastName rlike '.[eo]';
 
 
