@@ -75,41 +75,11 @@ INSERT INTO `bank`.`application` (`idApplication`, `Sum`, `CreditState`, `Curren
 INSERT INTO `bank`.`application` (`idApplication`, `Sum`, `CreditState`, `Currency`, `Client_idClient`) VALUES ('15', '6600', 'Not returned', 'Euro', '3');
 #
 # **************************************************************************************************
-#
 # 1. +Вибрати усіх клієнтів, чиє ім'я має менше ніж 6 символів.
-# 2. +Вибрати львівські відділення банку.+
-# 3. +Вибрати клієнтів з вищою освітою та посортувати по прізвищу.
-# 4. +Виконати сортування у зворотньому порядку над таблицею Заявка і вивести 5 останніх елементів.
-# 5. +Вивести усіх клієнтів, чиє прізвище закінчується на OV чи OVA.
-# 6. +Вивести клієнтів банку, які обслуговуються київськими відділеннями.
-# 7. +Вивести імена клієнтів та їхні номера телефону, погрупувавши їх за іменами.
-# 8. +Вивести дані про клієнтів, які мають кредит більше ніж на 5000 тисяч гривень.
-# 9. +Порахувати кількість клієнтів усіх відділень та лише львівських відділень.
-# 10. Знайти кредити, які мають найбільшу суму для кожного клієнта окремо.
-# 11. Визначити кількість заявок на крдеит для кожного клієнта.
-# 12. Визначити найбільший та найменший кредити.
-# 13. Порахувати кількість кредитів для клієнтів,які мають вищу освіту.
-# 14. Вивести дані про клієнта, в якого середня сума кредитів найвища.
-# 15. Вивести відділення, яке видало в кредити найбільше грошей
-# 16. Вивести відділення, яке видало найбільший кредит.
-# 17. Усім клієнтам, які мають вищу освіту, встановити усі їхні кредити у розмірі 6000 грн.
-# 18. Усіх клієнтів київських відділень пересилити до Києва.
-# 19. Видалити усі кредити, які є повернені.
-# 20. Видалити кредити клієнтів, в яких друга літера прізвища є голосною.
-# Знайти львівські відділення, які видали кредитів на загальну суму більше ніж 5000
-# Знайти клієнтів, які повністю погасили кредити на суму більше ніж 5000
-# /* Знайти максимальний неповернений кредит.*/
-# /*Знайти клієнта, сума кредиту якого найменша*/
-# /*Знайти кредити, сума яких більша за середнє значення усіх кредитів*/
-# /*Знайти клієнтів, які є з того самого міста, що і клієнт, який взяв найбільшу кількість кредитів
-# /*місто чувака який набрав найбільше кредитів
-#
-# ***************************************************************************************************
-# 1. +Вибрати усіх клієнтів, чиє ім'я має менше ніж 6 символів.
-select * from bank.client where FirstName like '_____';
+select * from bank.client where LENGTH(FirstName) < 6;
 
 # 2. +Вибрати львівські відділення банку.+
-select * from bank.department where DepartmentCity like 'Lviv';
+select * from bank.department where DepartmentCity like 'lviv';
 
 # 3. +Вибрати клієнтів з вищою освітою та посортувати по прізвищу.
 select * from bank.client where Education = 'high' order by LastName;
@@ -170,8 +140,7 @@ select *
          from application a,
               client c
          where c.idClient = a.Client_idClient
-         group by c.FirstName,
-                  c.LastName
+         group by a.Sum
          order by a.Sum
          limit 1) min
 union all
@@ -183,8 +152,7 @@ select *
          from application a,
               client c
          where c.idClient = a.Client_idClient
-         group by c.FirstName,
-                  c.LastName
+         group by a.Sum
          order by a.Sum desc
          limit 1) max;
 
@@ -313,10 +281,29 @@ limit 1;
 
 
 # 17. Усім клієнтам, які мають вищу освіту, встановити усі їхні кредити у розмірі 6000 грн.
-
+update application a join client c on a.Client_idClient = c.idClient
+set Sum = 6000
+    where c.Education = 'high';
 
 # 18. Усіх клієнтів київських відділень переселити до Києва.
+update client c join department d on c.Department_idDepartment = d.idDepartment
+set c.City = 'Kyiv'
+where d.DepartmentCity = 'Kyiv';
+
+select concat(c.FirstName, ' ',c.LastName) Name,
+       c.City,
+       concat(d.DepartmentCity, ' ', d.idDepartment) Department
+from client c join department d on c.Department_idDepartment = d.idDepartment;
+
 # 19. Видалити усі кредити, які є повернені.
+delete
+from application
+where CreditState = 'Returned';
+
 # 20. Видалити кредити клієнтів, в яких друга літера прізвища є голосною.
+select a.Sum,
+       concat(c.FirstName, ' ',c.LastName) Name
+from application a join client c on a.Client_idClient = c.idClient
+where c.LastName like '_[aeiouy]%';
 
 
