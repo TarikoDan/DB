@@ -305,6 +305,13 @@ select a.Sum,
        concat(c.FirstName, ' ',c.LastName) Name
 from application a join client c on a.Client_idClient = c.idClient
 # where substring(c.LastName,2,1) in ('a','e','i','o','u','y');
-where c.LastName rlike '.[eo]';
+where c.LastName rlike '^.[aeiouy]';
 
+delete a
+FROM application a
+         JOIN client c ON a.Client_idClient = c.idClient
+WHERE c.LastName RLIKE '^.[aeiouy]';
 
+select a.Sum,
+       concat(c.FirstName, ' ',c.LastName) Name
+from application a join client c on a.Client_idClient = c.idClient;
